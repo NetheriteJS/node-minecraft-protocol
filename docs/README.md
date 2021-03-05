@@ -1,65 +1,61 @@
-# minecraft protocol
-[![NPM version](https://img.shields.io/npm/v/minecraft-protocol.svg)](https://www.npmjs.com/package/minecraft-protocol)
-[![Build Status](https://github.com/PrismarineJS/node-minecraft-protocol/workflows/CI/badge.svg)](https://github.com/PrismarineJS/node-minecraft-protocol/actions?query=workflow%3A%22CI%22)
-[![Discord](https://img.shields.io/badge/chat-on%20discord-brightgreen.svg)](https://discord.gg/GsEFRM8)
-[![Gitter](https://img.shields.io/badge/chat-on%20gitter-brightgreen.svg)](https://gitter.im/PrismarineJS/general)
-[![Irc](https://img.shields.io/badge/chat-on%20irc-brightgreen.svg)](https://irc.gitter.im/)
+# node-minecraft-protocol
 
-[![Try it on gitpod](https://img.shields.io/badge/try-on%20gitpod-brightgreen.svg)](https://gitpod.io/#https://github.com/PrismarineJS/node-minecraft-protocol)
+[![Issues](https://img.shields.io/github/issues/netheritejs/node-minecraft-protocol?style=flat-square)](https://github.com/netheritejs/node-minecraft-protocol/issues)
+![Last commit](https://img.shields.io/github/last-commit/netheritejs/node-minecraft-protocol?style=flat-square)
+![Node version](https://img.shields.io/node/v/netheritejs/node-minecraft-protocol?style=flat-square)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
+![License](https://img.shields.io/github/license/netheritejs/node-minecraft-protocol?style=flat-square)
+![NPM](https://img.shields.io/npm/v/netheritejs/node-minecraft-protocol?style=flat-square)
+
+Minecraft Protocol
 
 Parse and serialize minecraft packets, plus authentication and encryption.
 
 ## Features
 
- * Supports Minecraft PC version 1.7.10, 1.8.8, 1.9 (15w40b, 1.9, 1.9.1-pre2, 1.9.2, 1.9.4),
-  1.10 (16w20a, 1.10-pre1, 1.10, 1.10.1, 1.10.2), 1.11 (16w35a, 1.11, 1.11.2), 1.12 (17w15a, 17w18b, 1.12-pre4, 1.12, 1.12.1, 1.12.2), and 1.13 (17w50a, 1.13, 1.13.1, 1.13.2-pre1, 1.13.2-pre2, 1.13.2), 1.14 (1.14, 1.14.1, 1.14.3, 1.14.4)
-  , 1.15 (1.15, 1.15.1, 1.15.2) and 1.16 (20w13b, 20w14a, 1.16-rc1, 1.16, 1.16.1, 1.16.2, 1.16.3, 1.16.4)
- * Parses all packets and emits events with packet fields as JavaScript
-   objects.
- * Send a packet by supplying fields as a JavaScript object.
- * Client
-   - Authenticating and logging in
-   - Encryption
-   - Compression
-   - Both online and offline mode
-   - Respond to keep-alive packets.
-   - Ping a server for status
- * Server
-   - Online/Offline mode
-   - Encryption
-   - Compression
-   - Handshake
-   - Keep-alive checking
-   - Ping status
- * Robust test coverage.
- * Optimized for rapidly staying up to date with Minecraft protocol updates.
+* Supports Minecraft PC versions from 1.7.10 up to 1.16.4
+* Parses all packets and emits events with packet fields as JavaScript objects.
+* Send a packet by supplying fields as a JavaScript object.
+* Client
+  - Authenticating and logging in
+  - Encryption
+  - Compression
+  - Both online and offline mode
+  - Respond to keep-alive packets.
+  - Ping a server for status
+* Server
+  - Online/Offline mode
+  - Encryption
+  - Compression
+  - Handshake
+  - Keep-alive checking
+  - Ping status
+* Robust test coverage.
+* Optimized for rapidly staying up to date with Minecraft protocol updates.
  
-Want to contribute on something important for PrismarineJS ? go to https://github.com/PrismarineJS/mineflayer/wiki/Big-Prismarine-projects
+Want to contribute on something important for NetheriteJS or PrismarineJS?
+Go to https://github.com/prismarinejs/mineflayer/wiki/Big-Prismarine-projects
 
 ## Third Party Plugins
 
 node-minecraft-protocol is pluggable.
 
-* [minecraft-protocol-forge](https://github.com/PrismarineJS/node-minecraft-protocol-forge) add forge support to minecraft-protocol
+* [minecraft-protocol-forge](https://github.com/Netheritejs/node-minecraft-protocol-forge) add forge support to minecraft-protocol
 
 ## Projects Using node-minecraft-protocol
 
- * [mineflayer](https://github.com/PrismarineJS/mineflayer/) - create minecraft
-   bots with a stable, high level API.
- * [mcserve](https://github.com/andrewrk/mcserve) - runs and monitors your
-   minecraft server, provides real-time web interface, allow your users to
-   create bots.
- * [flying-squid](https://github.com/PrismarineJS/flying-squid) create minecraft
-   servers with a high level API, also a minecraft server by itself.
- * [pakkit](https://github.com/Heath123/pakkit) To monitor your packets
- * [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) to easily debug your minecraft packets
+* [mineflayer](https://github.com/Netheritejs/mineflayer/) - create minecraft bots with a stable, high level API.
+* [mcserve](https://github.com/andrewrk/mcserve) - runs and monitors your minecraft server, provides real-time web interface, allow your users to create bots.
+* [flying-squid](https://github.com/Netheritejs/flying-squid) create minecraft servers with a high level API, also a minecraft server by itself.
+* [pakkit](https://github.com/Heath123/pakkit) To monitor your packets
+* [minecraft-packet-debugger](https://github.com/wvffle/minecraft-packet-debugger) to easily debug your minecraft packets
 
 ## Usage
 
 ### Echo client example
 
 ```js
-var mc = require('minecraft-protocol');
+var mc = require('@netheritejs/minecraft-protocol');
 var client = mc.createClient({
   host: "localhost",   // optional
   port: 25565,         // optional
@@ -84,7 +80,7 @@ If the server is in offline mode, you may leave out the `password` option.
 ### Hello World server example
 
 ```js
-var mc = require('minecraft-protocol');
+var mc = require('@netheritejs/minecraft-protocol');
 var server = mc.createServer({
   'online-mode': true,   // optional
   encryption: true,      // optional
@@ -136,13 +132,12 @@ server.on('login', function(client) {
 
 ## Installation
 
-`npm install minecraft-protocol`
+`npm install @netheritejs/minecraft-protocol`
 
 ## Documentation
 
-See [doc](API.md)
-See [faq](FAQ.md)
-
+See [API documentation](API.md)
+See [FAQ](FAQ.md)
 
 ## Testing
 
@@ -165,7 +160,9 @@ node your_script.js
 
 ## Contribute
 
-Please read https://github.com/PrismarineJS/prismarine-contribute
+Pull requests are welcome.
+
+Unlike PrismarineJS, you can make backward-incompatible changes.
 
 ## History
 
