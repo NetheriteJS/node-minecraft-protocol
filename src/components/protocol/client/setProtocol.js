@@ -1,6 +1,4 @@
-'use strict'
-
-const states = require('../states')
+const states = require('../enums').states
 
 module.exports = function (client, options) {
   client.on('connect', onConnect)

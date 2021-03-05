@@ -2,7 +2,7 @@ const UUID = require('uuid-1345')
 const bufferEqual = require('buffer-equal')
 const crypto = require('crypto')
 const pluginChannels = require('../client/pluginChannels')
-const states = require('../states')
+const states = require('../enums').states
 const yggdrasil = require('yggdrasil')
 
 module.exports = function (client, server, options) {

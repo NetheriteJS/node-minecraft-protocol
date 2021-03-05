@@ -1,4 +1,4 @@
-const states = require('../states')
+const states = require('../enums').states
 
 module.exports = function (client, server, { version }) {
   client.once('set_protocol', onHandshake)

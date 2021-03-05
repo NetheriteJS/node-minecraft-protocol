@@ -1,20 +1,6 @@
-const Transform = require('readable-stream').Transform
+const { Transform } = require('-stream')
 const crypto = require('crypto')
 const aesjs = require('aes-js')
-
-function createCipher (secret) {
-  if (crypto.getCiphers().includes('aes-128-cfb8')) {
-    return crypto.createCipheriv('aes-128-cfb8', secret, secret)
-  }
-  return new Cipher(secret)
-}
-
-function createDecipher (secret) {
-  if (crypto.getCiphers().includes('aes-128-cfb8')) {
-    return crypto.createDecipheriv('aes-128-cfb8', secret, secret)
-  }
-  return new Decipher(secret)
-}
 
 class Cipher extends Transform {
   constructor (secret) {
@@ -22,7 +8,7 @@ class Cipher extends Transform {
     this.aes = new aesjs.ModeOfOperation.cfb(secret, secret, 1) // eslint-disable-line new-cap
   }
 
-  _transform (chunk, enc, cb) {
+  _transform (chunk, _, cb) {
     try {
       const res = this.aes.encrypt(chunk)
       cb(null, res)
@@ -38,7 +24,7 @@ class Decipher extends Transform {
     this.aes = new aesjs.ModeOfOperation.cfb(secret, secret, 1) // eslint-disable-line new-cap
   }
 
-  _transform (chunk, enc, cb) {
+  _transform (chunk, _, cb) {
     try {
       const res = this.aes.decrypt(chunk)
       cb(null, res)
@@ -48,7 +34,17 @@ class Decipher extends Transform {
   }
 }
 
-module.exports = {
-  createCipher: createCipher,
-  createDecipher: createDecipher
+function createInputNative (secret = null) {
+  return crypto.createDecipheriv('aes-128-cfb8', secret, secret)
 }
+
+function createOutputNative (secret = null) {
+  return crypto.createCipheriv('aes-128-cfb8', secret, secret)
+}
+
+function createInput (secret = null) { return new Decipher(secret) }
+function createOutput (secret = null) { return new Cipher(secret) }
+
+module.exports = crypto.getCiphers().includes('aes-128-cfb8')
+  ? { createInput: createInputNative, createOutput: createOutputNative }
+  : { createInput, createOutput }

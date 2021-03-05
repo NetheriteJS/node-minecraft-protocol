@@ -1,18 +1,7 @@
-'use strict'
-
-const nbt = require('prismarine-nbt')
+const NBT = require('prismarine-nbt')
 const UUID = require('uuid-1345')
 const zlib = require('zlib')
 
-module.exports = {
-  UUID: [readUUID, writeUUID, 16],
-  nbt: [readNbt, writeNbt, sizeOfNbt],
-  optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
-  compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
-  restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
-  entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
-  topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
-}
 const PartialReadError = require('protodef').utils.PartialReadError
 
 function readUUID (buffer, offset) {
@@ -22,42 +11,37 @@ function readUUID (buffer, offset) {
     size: 16
   }
 }
-
 function writeUUID (value, buffer, offset) {
   const buf = UUID.parse(value)
   buf.copy(buffer, offset)
   return offset + 16
 }
+const sizeOfUUID = 16
 
 function readNbt (buffer, offset) {
-  return nbt.proto.read(buffer, offset, 'nbt')
+  return NBT.proto.read(buffer, offset, 'nbt')
 }
-
 function writeNbt (value, buffer, offset) {
-  return nbt.proto.write(value, buffer, offset, 'nbt')
+  return NBT.proto.write(value, buffer, offset, 'nbt')
 }
-
 function sizeOfNbt (value) {
-  return nbt.proto.sizeOf(value, 'nbt')
+  return NBT.proto.sizeOf(value, 'nbt')
 }
 
 function readOptionalNbt (buffer, offset) {
   if (offset + 1 > buffer.length) { throw new PartialReadError() }
   if (buffer.readInt8(offset) === 0) return { size: 1 }
-  return nbt.proto.read(buffer, offset, 'nbt')
+  return NBT.proto.read(buffer, offset, 'nbt')
 }
-
 function writeOptionalNbt (value, buffer, offset) {
   if (value === undefined) {
     buffer.writeInt8(0, offset)
     return offset + 1
   }
-  return nbt.proto.write(value, buffer, offset, 'nbt')
+  return NBT.proto.write(value, buffer, offset, 'nbt')
 }
-
 function sizeOfOptionalNbt (value) {
-  if (value === undefined) { return 1 }
-  return nbt.proto.sizeOf(value, 'nbt')
+  return value !== undefined ? NBT.proto.sizeOf(value, 'nbt') : 1
 }
 
 // Length-prefixed compressed NBT, see differences: http://wiki.vg/index.php?title=Slot_Data&diff=6056&oldid=4753
@@ -71,20 +55,19 @@ function readCompressedNbt (buffer, offset) {
 
   const nbtBuffer = zlib.gunzipSync(compressedNbt) // TODO: async
 
-  const results = nbt.proto.read(nbtBuffer, 0, 'nbt')
+  const results = NBT.proto.read(nbtBuffer, 0, 'nbt')
   return {
     size: length + 2,
     value: results.value
   }
 }
-
 function writeCompressedNbt (value, buffer, offset) {
   if (value === undefined) {
     buffer.writeInt16BE(-1, offset)
     return offset + 2
   }
   const nbtBuffer = Buffer.alloc(sizeOfNbt(value))
-  nbt.proto.write(value, nbtBuffer, 0, 'nbt')
+  NBT.proto.write(value, nbtBuffer, 0, 'nbt')
 
   const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
   compressedNbt.writeUInt8(0, 9) // clear the OS field to match MC
@@ -93,12 +76,11 @@ function writeCompressedNbt (value, buffer, offset) {
   compressedNbt.copy(buffer, offset + 2)
   return offset + 2 + compressedNbt.length
 }
-
 function sizeOfCompressedNbt (value) {
   if (value === undefined) { return 2 }
 
   const nbtBuffer = Buffer.alloc(sizeOfNbt(value, 'nbt'))
-  nbt.proto.write(value, nbtBuffer, 0, 'nbt')
+  NBT.proto.write(value, nbtBuffer, 0, 'nbt')
 
   const compressedNbt = zlib.gzipSync(nbtBuffer) // TODO: async
 
@@ -111,12 +93,10 @@ function readRestBuffer (buffer, offset) {
     size: buffer.length - offset
   }
 }
-
 function writeRestBuffer (value, buffer, offset) {
   value.copy(buffer, offset)
   return offset + value.length
 }
-
 function sizeOfRestBuffer (value) {
   return value.length
 }
@@ -139,7 +119,6 @@ function readEntityMetadata (buffer, offset, { type, endVal }) {
     cursor += results.size
   }
 }
-
 function writeEntityMetadata (value, buffer, offset, { type, endVal }) {
   const self = this
   value.forEach(function (item) {
@@ -148,7 +127,6 @@ function writeEntityMetadata (value, buffer, offset, { type, endVal }) {
   buffer.writeUInt8(endVal, offset)
   return offset + 1
 }
-
 function sizeOfEntityMetadata (value, { type }) {
   let size = 1
   for (let i = 0; i < value.length; ++i) {
@@ -176,7 +154,6 @@ function readTopBitSetTerminatedArray (buffer, offset, { type }) {
     }
   }
 }
-
 function writeTopBitSetTerminatedArray (value, buffer, offset, { type }) {
   const self = this
   let prevOffset = offset
@@ -187,11 +164,104 @@ function writeTopBitSetTerminatedArray (value, buffer, offset, { type }) {
   })
   return offset
 }
-
 function sizeOfTopBitSetTerminatedArray (value, { type }) {
   let size = 0
   for (let i = 0; i < value.length; ++i) {
     size += this.sizeOf(value[i], type, {})
   }
   return size
+}
+
+module.exports = {
+  compiler: {
+    Read: {
+      UUID: ['native', readUUID],
+      restBuffer: ['native', readRestBuffer],
+      nbt: ['native', readNbt],
+      optionalNbt: ['native', readOptionalNbt],
+      compressedNbt: ['native', readCompressedNbt],
+      entityMetadataLoop: ['parametrizable', (compiler, { type, endVal }) => {
+        let code = 'let cursor = offset\n'
+        code += 'const data = []\n'
+        code += 'while (true) {\n'
+        code += `  if (ctx.u8(buffer, cursor).value === ${endVal}) return { value: data, size: cursor + 1 - offset }\n`
+        code += '  const elem = ' + compiler.callType(type, 'cursor') + '\n'
+        code += '  data.push(elem.value)\n'
+        code += '  cursor += elem.size\n'
+        code += '}'
+        return compiler.wrapCode(code)
+      }],
+      topBitSetTerminatedArray: ['parametrizable', (compiler, { type, endVal }) => {
+        let code = 'let cursor = offset\n'
+        code += 'const data = []\n'
+        code += 'while (true) {\n'
+        code += '  const item = ctx.u8(buffer, cursor).value\n'
+        code += '  buffer[cursor] = buffer[cursor] & 127\n'
+        code += '  const elem = ' + compiler.callType(type, 'cursor') + '\n'
+        code += '  data.push(elem.value)\n'
+        code += '  cursor += elem.size\n'
+        code += '  if ((item & 128) === 0) return { value: data, size: cursor - offset }\n'
+        code += '}'
+        return compiler.wrapCode(code)
+      }]
+    },
+    Write: {
+      UUID: ['native', writeUUID],
+      restBuffer: ['native', writeRestBuffer],
+      nbt: ['native', writeNbt],
+      optionalNbt: ['native', writeOptionalNbt],
+      compressedNbt: ['native', writeCompressedNbt],
+      entityMetadataLoop: ['parametrizable', (compiler, { type, endVal }) => {
+        let code = 'for (const i in value) {\n'
+        code += '  offset = ' + compiler.callType('value[i]', type) + '\n'
+        code += '}\n'
+        code += `return offset + ctx.u8(${endVal}, buffer, offset)`
+        return compiler.wrapCode(code)
+      }],
+      topBitSetTerminatedArray: ['parametrizable', (compiler, { type }) => {
+        let code = 'let prevOffset = offset\n'
+        code += 'let ind = 0\n'
+        code += 'for (const i in value) {\n'
+        code += '  prevOffset = offset\n'
+        code += '  offset = ' + compiler.callType('value[i]', type) + '\n'
+        code += '  buffer[prevOffset] = ind !== value.length-1 ? (buffer[prevOffset] | 128) : buffer[prevOffset]\n'
+        code += '  ind++\n'
+        code += '}\n'
+        code += 'return offset'
+        return compiler.wrapCode(code)
+      }]
+    },
+    SizeOf: {
+      UUID: ['native', sizeOfUUID],
+      restBuffer: ['native', sizeOfRestBuffer],
+      nbt: ['native', sizeOfNbt],
+      optionalNbt: ['native', sizeOfOptionalNbt],
+      compressedNbt: ['native', sizeOfCompressedNbt],
+      entityMetadataLoop: ['parametrizable', (compiler, { type }) => {
+        let code = 'let size = 1\n'
+        code += 'for (const i in value) {\n'
+        code += '  size += ' + compiler.callType('value[i]', type) + '\n'
+        code += '}\n'
+        code += 'return size'
+        return compiler.wrapCode(code)
+      }],
+      topBitSetTerminatedArray: ['parametrizable', (compiler, { type }) => {
+        let code = 'let size = 0\n'
+        code += 'for (const i in value) {\n'
+        code += '  size += ' + compiler.callType('value[i]', type) + '\n'
+        code += '}\n'
+        code += 'return size'
+        return compiler.wrapCode(code)
+      }]
+    }
+  },
+  interpreter: {
+    UUID: [readUUID, writeUUID, sizeOfUUID],
+    nbt: [readNbt, writeNbt, sizeOfNbt],
+    optionalNbt: [readOptionalNbt, writeOptionalNbt, sizeOfOptionalNbt],
+    compressedNbt: [readCompressedNbt, writeCompressedNbt, sizeOfCompressedNbt],
+    restBuffer: [readRestBuffer, writeRestBuffer, sizeOfRestBuffer],
+    entityMetadataLoop: [readEntityMetadata, writeEntityMetadata, sizeOfEntityMetadata],
+    topBitSetTerminatedArray: [readTopBitSetTerminatedArray, writeTopBitSetTerminatedArray, sizeOfTopBitSetTerminatedArray]
+  }
 }
