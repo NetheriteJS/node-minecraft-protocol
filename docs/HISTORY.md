@@ -1,5 +1,26 @@
 # History
 
+## 1.25.0
+
+* add fullBuffer to packet event
+
+## 1.24.2
+
+* Throw if data is not available for a given version (@U9G)
+
+## 1.24.1
+
+* fix write to launcher_accounts.json (@majorblake)
+
+## 1.24.0
+
+* Using launcher_accounts.json as new token source (@Moondarker)
+* Fix msa caching bug (@extremeheat)
+
+## 1.23.3
+
+* add a reason to client timeout
+
 ## 1.23.2
 
 * Remove test code from microsoftAuth

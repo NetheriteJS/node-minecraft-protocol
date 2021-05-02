@@ -50,6 +50,7 @@ declare module 'minecraft-protocol' {
 		connect?: (client: Client) => void
 		agent?: Agent
 		auth?: 'mojang' | 'microsoft'
+		id?: number
 	}
 
 	export class Server extends EventEmitter {
@@ -60,6 +61,7 @@ declare module 'minecraft-protocol' {
 		motd: string
 		onlineModeExceptions: object
 		playerCount: number
+		writeToClients(clients: Client[], name: string, params: any): void
 		close(): void
 		on(event: 'connection', handler: (client: Client) => void): this
 		on(event: 'error', listener: (error: Error) => void): this
@@ -103,7 +105,7 @@ declare module 'minecraft-protocol' {
 	}
 
 	interface ClientsMap {
-		[key: string]: Client
+		[key: number]: Client
 	}
 
 	export interface PingOptions {

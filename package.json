@@ -1,6 +1,6 @@
 {
   "name": "minecraft-protocol",
-  "version": "1.23.2",
+  "version": "1.25.0",
   "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -10,7 +10,8 @@
   },
   "scripts": {
     "prepare": "npm install require-self && require-self",
-    "test": "mocha --recursive --reporter spec --exit",
+    "test": "mocha --recursive --reporter spec --exit -i -g \"Test version\"",
+    "test-non-par": "mocha --recursive --reporter spec --exit -g \"Test version\"",
     "lint": "standard",
     "fix": "standard --fix",
     "pretest": "npm run lint",
@@ -33,9 +34,10 @@
   },
   "browser": "src/browser.js",
   "devDependencies": {
-    "@types/node": "^14.0.1",
+    "@types/node": "^15.0.1",
     "espower-loader": "^1.0.0",
     "intelli-espower-loader": "^1.0.0",
+    "minecraft-packets": "^1.1.5",
     "minecraft-wrap": "^1.2.3",
     "mocha": "^8.0.1",
     "power-assert": "^1.0.0",
@@ -51,7 +53,7 @@
     "endian-toggle": "^0.0.0",
     "lodash.get": "^4.1.2",
     "lodash.merge": "^4.3.0",
-    "minecraft-data": "^2.70.0",
+    "minecraft-data": "^2.84.0",
     "minecraft-folder-path": "^1.1.0",
     "node-fetch": "^2.6.1",
     "node-rsa": "^0.4.2",
